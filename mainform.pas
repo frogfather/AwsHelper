@@ -55,6 +55,7 @@ var
   serviceLoader:TServiceLoader;
 begin
   serviceLoader:=TServiceLoader.create;
+  listbox1.Items:=serviceLoader.serviceList;
 end;
 
 end.
