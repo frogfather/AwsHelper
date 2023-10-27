@@ -44,6 +44,11 @@
         <Filename Value="cliprocess.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="serviceloader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="serviceLoader"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

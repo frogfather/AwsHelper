@@ -15,9 +15,10 @@ type
     private
     fProcess:TProcess;
     fParams:TStringlist;
+    fExecutable:String;
     property params: TStringlist read fParams;
     public
-    constructor create;
+    constructor create(executable_:string);
     procedure clearParams;
     procedure resetParams(default:boolean = true);
     procedure addParam(param:String);
@@ -29,11 +30,10 @@ implementation
 
 { TAwsCli }
 
-constructor TAwsCli.create;
+constructor TAwsCli.create(executable_:String);
 begin
-  fProcess:=TProcess.Create(Nil);
   fParams:=TStringlist.Create;
-
+  fExecutable:=executable_;
 end;
 
 procedure TAwsCli.addParam(param: String);
@@ -45,16 +45,15 @@ end;
 function TAwsCli.executeCommand: TStringList;
 var
   param:integer;
-  sParam:string;
 begin
+  fProcess:=TProcess.Create(Nil);
   result:=TStringlist.Create;
   fProcess.Executable := '/usr/local/bin/aws';
-    for param:= 0 to pred(params.Count) do
-      begin
-      sParam:=params[param];
-      fProcess.Parameters.Add(sParam);
-      end;
+
+  for param:= 0 to pred(params.Count) do fProcess.Parameters.Add(params[param]);
+  //TODO modify to run asynchronously
   fProcess.Options := fProcess.Options + [poWaitOnExit, poUsePipes, poStderrToOutPut];
+
   fProcess.Execute;
   result.LoadFromStream(fProcess.Output);
 end;

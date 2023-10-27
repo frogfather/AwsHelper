@@ -5,7 +5,7 @@ unit mainform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,cliProcess;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,cliProcess,serviceLoader;
 
 type
 
@@ -15,6 +15,7 @@ type
     Button1: TButton;
     ListBox1: TListBox;
     procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
 
   public
@@ -34,7 +35,7 @@ procedure TForm1.Button1Click(Sender: TObject);
 var
   awsCli:TAwsCli;
 begin
-  awsCli:=TAwsCli.create;
+  awsCli:=TAwsCli.create('/usr/local/bin/aws');
   awsCli.addParam('marketplace-catalog');
   awsCli.addParam('list-entities');
   awsCli.addParam('--catalog');
@@ -47,6 +48,13 @@ begin
   awsCli.addParam('us-east-1');
   listbox1.Items:= awsCli.executeCommand;
 
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+var
+  serviceLoader:TServiceLoader;
+begin
+  serviceLoader:=TServiceLoader.create;
 end;
 
 end.
