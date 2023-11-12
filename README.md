@@ -4,8 +4,8 @@ Uses TProcess to execute commands on aws cli
 
 Currently
 - Retrieves list of services by executing aws help
-Future
 - Retrieve list of commands for each service
 - Retrieve parameters for each command
-- display parameters to user
+Future
+- display controls for each parameter to user with appropriate type and validation
 - some kind of history feature to remember recently used commands
