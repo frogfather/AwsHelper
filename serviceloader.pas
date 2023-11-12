@@ -17,31 +17,47 @@ type
   TServiceLoader = class(TInterfacedObject)
     private
       fServices:TStringlist;
+      fCommands:TStringlist;
+      fParams:TStringlist;
       fAwsCli:TAwsCli;
       function removeWeirdCharacters(input_:string):string;
     public
       constructor create;
+      procedure getServiceList;
+      procedure getCommandsForService(service_: string);
+      procedure getParamsForCommand(service_,command_:string);
       property serviceList:TStringlist read fServices;
+      property commands:TStringlist read fCommands;
+      property params:TStringlist read fParams;
   end;
 
 implementation
 const SERVICE_LIST_START = 'AVAILABLE SERVICES';
+const COMMAND_LIST_START = 'AVAILABLE COMMANDS';
 const SERVICE_LIST_END = 'SEE ALSO';
+const PARAM_LIST_START = 'SYNOPSIS';
 { TServiceLoader }
 
 constructor TServiceLoader.create;
+begin
+  fServices:=TStringlist.create;
+  fCommands:=TStringlist.create;
+  fParams:=TStringlist.create;
+  fAwsCli:=TAwsCli.create('/usr/local/bin/aws');
+end;
+
+procedure TServiceLoader.getServiceList;
 var
   helpList:TStringlist;
   lineNo:integer;
   sLine:string;
   inServices:boolean;
 begin
-  fServices:=TStringlist.create;
-  fAwsCli:=TAwsCli.create('/usr/local/bin/aws');
+  fServices.Clear;
+  fAwsCli.clearParams;
   fAwsCli.addParam('help');
   helpList:=fAwsCli.executeCommand;
   inServices:=false;
-  writeln('help list '+inttostr(helplist.Count));
   for lineNo:=0 to pred(helpList.Count) do
     begin
     sLine:= removeWeirdCharacters(helpList[lineNo]);
@@ -49,8 +65,49 @@ begin
     if (inServices)and(sLine.Length > 0) then fServices.add(sLine.Trim.split(' ')[1]);
     if (sLine.Contains(SERVICE_LIST_START))then inServices:=true;
     end;
-  for lineNo:= 0 to pred(fServices.Count) do
-    writeLn(fServices[lineNo]);
+end;
+
+procedure TServiceLoader.getCommandsForService(service_: string);
+var
+  helpList:TStringlist;
+  lineNo:integer;
+  sLine:string;
+  inServices:boolean;
+begin
+  commands.Clear;
+  fAwsCli.clearParams;
+  fAwsCli.addParam(service_);
+  fAwsCli.addParam('help');
+  helpList:=fAwsCli.executeCommand;
+  inServices:=false;
+  for lineNo:=0 to pred(helpList.Count) do
+    begin
+    sLine:= removeWeirdCharacters(helpList[lineNo]);//Add if line has o at start
+    if (inServices)and(sLine.Length > 0) then fCommands.add(sLine.Trim.split(' ')[1]);
+    if (sLine.Contains(COMMAND_LIST_START))then inServices:=true;
+    end;
+end;
+
+procedure TServiceLoader.getParamsForCommand(service_, command_: string);
+var
+  paramList:TStringList;
+  inParams:Boolean;
+  lineNo:integer;
+  sLine:string;
+begin
+  params.clear;
+  fAwsCli.clearParams;
+  fAwsCli.addParam(service_);
+  fAwsCli.addParam(command_);
+  fAwsCli.addParam('help');
+  paramList:=fAwsCli.executeCommand;
+  inParams:=false;
+  for lineNo:=0 to pred(paramList.count) do
+    begin
+    sLine:=removeWeirdCharacters(paramList[lineNo]);
+    if inParams and (sLine.Length > 0) then fParams.Add(sLine);
+    if (sLine.Contains(PARAM_LIST_START)) then inParams:=true;
+    end;
 end;
 
 function TServiceLoader.removeWeirdCharacters(input_: string): string;

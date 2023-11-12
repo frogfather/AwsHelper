@@ -5,16 +5,23 @@ unit mainform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,cliProcess,serviceLoader;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  cliProcess, serviceLoader;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
-    Button1: TButton;
+    cbService: TComboBox;
+    cbCommand: TComboBox;
+    lCommand: TLabel;
+    lService: TLabel;
     ListBox1: TListBox;
+    pServices: TPanel;
     procedure Button1Click(Sender: TObject);
+    procedure cbCommandCloseUp(Sender: TObject);
+    procedure cbServiceCloseUp(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
 
@@ -24,7 +31,7 @@ type
 
 var
   Form1: TForm1;
-
+  loader:TServiceLoader;
 implementation
 
 {$R *.lfm}
@@ -50,12 +57,26 @@ begin
 
 end;
 
-procedure TForm1.FormShow(Sender: TObject);
-var
-  serviceLoader:TServiceLoader;
+procedure TForm1.cbCommandCloseUp(Sender: TObject);
 begin
-  serviceLoader:=TServiceLoader.create;
-  listbox1.Items:=serviceLoader.serviceList;
+  //Get params for this command
+  loader.getParamsForCommand(cbService.text,cbCommand.text);
+  listbox1.items:=loader.params;
+end;
+
+procedure TForm1.cbServiceCloseUp(Sender: TObject);
+begin
+  //Get the commands for this service
+  loader.getCommandsForService(cbService.Text);
+  cbCommand.items:= loader.commands;
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  loader:=TServiceLoader.create;
+  loader.getServiceList;
+  //TODO when process execution is async the line below will be done by an onComplete method
+  cbService.Items:=loader.serviceList;
 end;
 
 end.

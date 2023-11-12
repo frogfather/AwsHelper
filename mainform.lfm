@@ -1,28 +1,68 @@
 object Form1: TForm1
-  Left = 231
-  Height = 446
-  Top = 282
-  Width = 711
+  Left = 233
+  Height = 510
+  Top = 242
+  Width = 1184
   Caption = 'Form1'
-  ClientHeight = 446
-  ClientWidth = 711
+  ClientHeight = 510
+  ClientWidth = 1184
   OnShow = FormShow
   LCLVersion = '2.2.6.0'
-  object Button1: TButton
-    Left = 60
-    Height = 25
-    Top = 57
-    Width = 75
-    Caption = 'Button1'
-    OnClick = Button1Click
-    TabOrder = 0
-  end
   object ListBox1: TListBox
-    Left = 184
-    Height = 344
-    Top = 32
+    Left = 728
+    Height = 312
+    Top = 168
     Width = 424
     ItemHeight = 0
+    TabOrder = 0
+  end
+  object pServices: TPanel
+    Left = 0
+    Height = 136
+    Top = 0
+    Width = 1184
+    Align = alTop
+    ClientHeight = 136
+    ClientWidth = 1184
     TabOrder = 1
+    object cbService: TComboBox
+      Left = 56
+      Height = 20
+      Top = 40
+      Width = 240
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      AutoSize = False
+      ItemHeight = 26
+      OnCloseUp = cbServiceCloseUp
+      ParentFont = False
+      Style = csDropDownList
+      TabOrder = 0
+      Text = '0'
+    end
+    object cbCommand: TComboBox
+      Left = 56
+      Height = 20
+      Top = 96
+      Width = 240
+      ItemHeight = 19
+      OnCloseUp = cbCommandCloseUp
+      TabOrder = 1
+    end
+    object lService: TLabel
+      Left = 64
+      Height = 16
+      Top = 18
+      Width = 45
+      Caption = 'Service'
+      ParentColor = False
+    end
+    object lCommand: TLabel
+      Left = 64
+      Height = 16
+      Top = 72
+      Width = 62
+      Caption = 'Command'
+      ParentColor = False
+    end
   end
 end
