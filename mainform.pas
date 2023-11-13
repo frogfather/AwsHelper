@@ -61,7 +61,7 @@ procedure TForm1.cbCommandCloseUp(Sender: TObject);
 begin
   //Get params for this command
   loader.getParamsForCommand(cbService.text,cbCommand.text);
-  listbox1.items:=loader.params;
+  listbox1.items:=loader.testParams;
 end;
 
 procedure TForm1.cbServiceCloseUp(Sender: TObject);

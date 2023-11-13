@@ -49,6 +49,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="serviceLoader"/>
       </Unit>
+      <Unit>
+        <Filename Value="arrayutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="arrayUtils"/>
+      </Unit>
+      <Unit>
+        <Filename Value="anysort.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

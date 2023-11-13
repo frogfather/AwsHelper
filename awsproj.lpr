@@ -10,7 +10,7 @@ uses
   athreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, mainform, cliprocess, serviceLoader
+  Forms, mainform, cliprocess, serviceLoader, arrayUtils, anysort
   { you can add units after this };
 
 {$R *.res}
