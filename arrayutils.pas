@@ -23,6 +23,16 @@ type
   function splice(index:integer; deleteCount:integer=0; newItems: TIntArray=nil):TIntArray;
   end;
 
+  { TStringArrayHelper }
+  TStringArrayHelper = type helper for TStringArray
+  function size: integer;
+  function push(element: string):integer;
+  function indexOf(element:string):integer;
+  function splice(index:integer; deleteCount: integer=0; newItems: TStringArray=nil):TStringArray;
+  function join(joinWith:string):string;
+  function upCaseFirst:TStringArray;
+  end;
+
   { TParamArrayHelper }
   TParamArrayHelper = type helper for TParamArray
   procedure clear;
@@ -311,6 +321,57 @@ begin
        aArray[index+adjustIndex]:= newItems[adjustIndex];
      end;
 end;
+
+{ TStringArrayHelper }
+
+function TStringArrayHelper.size: integer;
+begin
+  result:= length(self);
+end;
+
+function TStringArrayHelper.push(element: string): integer;
+begin
+  insert(element,self,length(self));
+  result:=self.size;
+end;
+
+function TStringArrayHelper.indexOf(element: string): integer;
+begin
+  result:= specialize getIndex<string>(element,self);
+end;
+
+function TStringArrayHelper.splice(index: integer; deleteCount: integer;
+  newItems: TStringArray): TStringArray;
+begin
+  result:= specialize splice<string>(self,index,deleteCount, newItems);
+end;
+
+function TStringArrayHelper.join(joinWith:string): string;
+var
+  lineNo:integer;
+begin
+  result:='';
+  for lineNo:=0 to pred(self.size) do
+    begin
+    result:=result+self[LineNo];
+    if (LineNo < pred(self.size))
+      then result:=result+joinWith;
+    end;
+end;
+
+function TStringArrayHelper.upCaseFirst: TStringArray;
+var
+  lineNo:integer;
+  sLine:string;
+begin
+  result:=self;
+  for lineNo:=0 to pred(result.size) do
+    begin
+    sLine:=result[lineNo];
+    result[lineNo]:=upcase(sLine.Substring(0,1))+sLine.Substring(1);
+    end;
+end;
+
 
 { TParamArrayHelper }
 

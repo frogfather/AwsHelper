@@ -22,6 +22,10 @@ type
       fAwsCli:TAwsCli;
       function removeWeirdCharacters(input_:string):string;
       function extractName(input_:string):string;
+      function getDisplayName(paramName_:string):string;
+      function findOption(optionList:TStringlist;paramName:string):string;
+      function getParamType(option_:string):string;
+      function getParamDescription(option_:string):string;
       function getTestParams:TStringlist;
     public
       constructor create;
@@ -40,6 +44,7 @@ const COMMAND_LIST_START = 'AVAILABLE COMMANDS';
 const SERVICE_LIST_END = 'SEE ALSO';
 const PARAM_LIST_START = 'SYNOPSIS';
 const PARAM_LIST_OPTIONS = 'OPTIONS';
+const PARAM_LIST_GLOBAL_OPTIONS = 'GLOBAL OPTIONS';
 { TServiceLoader }
 
 constructor TServiceLoader.create;
@@ -95,11 +100,12 @@ end;
 procedure TServiceLoader.getParamsForCommand(service_, command_: string);
 var
   resultList:TStringList;
-  paramName,paramDesc,paramType:string;
-  paramRequired:boolean;
-  inParams:Boolean;
+  synopsisList,OptionList,GlobalOptionList:TStringList;
+  paramName,paramDisplayName,paramDescription,paramType:string;
+  paramRequired,paramGlobal:boolean;
+  inParams,inOptions,inGlobal:Boolean;
   lineNo:integer;
-  sLine:string;
+  sLine,sOption:string;
 begin
   params.clear;
   fAwsCli.clearParams;
@@ -107,20 +113,63 @@ begin
   fAwsCli.addParam(command_);
   fAwsCli.addParam('help');
   resultList:=fAwsCli.executeCommand;
+  synopsisList:=TStringlist.create;
+  optionList:=TStringlist.create;
+  globalOptionList:=TStringlist.create;
   inParams:=false;
+  inOptions:=false;
+  inGlobal:=false;
+  //First separate the results into three lists
+  //The parameters, the options for these params
+  //and the global options
   for lineNo:=0 to pred(resultList.count) do
     begin
     sLine:=removeWeirdCharacters(resultList[lineNo]);
-    if inParams and (sLine.Length > 0) then
+    if (sLine.Length = 0) then continue;
+
+    if inParams then synopsisList.Add(sLine)
+    else if inOptions then optionList.add(sLine)
+    else if inGlobal then globalOptionList.add(sLine);
+
+    if (sLine.Contains(PARAM_LIST_START))
+      then inParams:=true
+    else if (sLine.Contains(PARAM_LIST_OPTIONS) and (not sLine.Contains(PARAM_LIST_GLOBAL_OPTIONS)))
+      then
+        begin
+        inParams:=false;
+        inOptions:=true;
+        end
+    else if (sLine.Contains(PARAM_LIST_GLOBAL_OPTIONS))
+      then
+        begin
+        inParams:=false;
+        inOptions:=false;
+        inGlobal:=true;
+        end;
+    end;
+  //Now go through each entry in the synopsis list
+  //and get the details
+  for LineNo:=0 to pred(synopsisList.Count) do
+    begin
+    sLine:=synopsisList[LineNo];
+    paramRequired:=(sLine.IndexOf('[') = -1);
+    paramName:=extractName(sLine);
+    if (paramName.IndexOf('--') = -1) then continue;
+
+    paramDisplayName:=getDisplayName(paramName);
+    paramGlobal:=false;
+    sOption:=findOption(optionList,paramName);
+    if (sOption = '') then
       begin
-      //If it's in square brackets it's optional
-      paramRequired:=(sLine.IndexOf('[')=-1);
-      paramName:=extractName(sLine);
-      if (paramName.IndexOf('--') > -1) then
-        params.push(TParam.Create(paramName,paramRequired));
+      sOption:=findOption(globalOptionList,paramName);
+      paramGlobal:=true;
       end;
-    if (sLine.Contains(PARAM_LIST_START)) then inParams:=true
-    else if (sLine.Contains(PARAM_LIST_OPTIONS)) then inParams:=false;
+    if (sOption <> '') then
+      begin
+      paramType:=getParamType(sOption);
+      paramDescription:=getParamDescription(sOption);
+      params.push(TParam.create(paramName,paramDisplayName,paramType,paramDescription,paramRequired,paramGlobal));
+      end;
     end;
 end;
 
@@ -153,6 +202,44 @@ begin
   //remove square brackets, spaces and angle brackets
   result:=input_.trim.Split([' '])[0].Replace('[','').Replace(']','');
 end;
+
+function TServiceLoader.getDisplayName(paramName_: string): string;
+var
+  sepWords:TStringArray;
+begin
+  //remove leading --, replace - with space and capitalise words
+  sepWords:=paramName_.Replace('--','').split(['-']).upCaseFirst;
+  result:=sepWords.join(' ');
+end;
+
+function TServiceLoader.findOption(optionList: TStringlist; paramName: string
+  ): string;
+var
+  lineNo:integer;
+  sLine:string;
+  inOption:boolean;
+begin
+  inOption:=false;
+  result:='';
+  for LineNo:=0 to pred(optionList.Count) do
+    begin
+    sLine:=optionList[LineNo];
+    if (sLine.Contains(paramName)) then inOption:=true;
+    if inOption then result:=result + sLine+' ';
+    if (inOption and (lineNo > 0) and (optionList[LineNo-1].Trim = '')and sLine.Contains('--')) then exit;
+    end;
+end;
+//TODO write these
+function TServiceLoader.getParamType(option_: string): string;
+begin
+  result:='';
+end;
+
+function TServiceLoader.getParamDescription(option_: string): string;
+begin
+  result:=''
+end;
+
 //Temp method to return params in a displayable form
 function TServiceLoader.getTestParams: TStringlist;
 var
