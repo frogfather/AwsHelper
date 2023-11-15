@@ -19,7 +19,6 @@ type
     lService: TLabel;
     ListBox1: TListBox;
     pServices: TPanel;
-    procedure Button1Click(Sender: TObject);
     procedure cbCommandCloseUp(Sender: TObject);
     procedure cbServiceCloseUp(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -37,25 +36,6 @@ implementation
 {$R *.lfm}
 
 { TForm1 }
-
-procedure TForm1.Button1Click(Sender: TObject);
-var
-  awsCli:TAwsCli;
-begin
-  awsCli:=TAwsCli.create('/usr/local/bin/aws');
-  awsCli.addParam('marketplace-catalog');
-  awsCli.addParam('list-entities');
-  awsCli.addParam('--catalog');
-  awsCli.addParam('AWSMarketplace');
-  awsCli.addParam('--entity-type');
-  awsCli.addParam('SaaSProduct');
-  awsCli.addParam('--profile');
-  awsCli.addParam('mp_cp');
-  awsCli.addParam('--region');
-  awsCli.addParam('us-east-1');
-  listbox1.Items:= awsCli.executeCommand;
-
-end;
 
 procedure TForm1.cbCommandCloseUp(Sender: TObject);
 begin

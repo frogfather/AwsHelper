@@ -48,6 +48,7 @@ begin
   if fRequired then
   result:=fName+' ('+ftype+') '+' '+fDisplayName+' '+fDescription else
   result:='['+fName+'] ('+ftype+') '+' '+fDisplayName+' '+fDescription;
+  if fGlobal then result:=result+' Global';
 end;
 
 end.

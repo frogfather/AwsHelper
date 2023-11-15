@@ -45,6 +45,7 @@ const SERVICE_LIST_END = 'SEE ALSO';
 const PARAM_LIST_START = 'SYNOPSIS';
 const PARAM_LIST_OPTIONS = 'OPTIONS';
 const PARAM_LIST_GLOBAL_OPTIONS = 'GLOBAL OPTIONS';
+const PARAM_LIST_OUTPUT = 'OUTPUT';
 { TServiceLoader }
 
 constructor TServiceLoader.create;
@@ -125,9 +126,8 @@ begin
   for lineNo:=0 to pred(resultList.count) do
     begin
     sLine:=removeWeirdCharacters(resultList[lineNo]);
-    if (sLine.Length = 0) then continue;
 
-    if inParams then synopsisList.Add(sLine)
+    if (inParams and (sLine.Length > 0)) then synopsisList.Add(sLine)
     else if inOptions then optionList.add(sLine)
     else if inGlobal then globalOptionList.add(sLine);
 
@@ -145,6 +145,13 @@ begin
         inParams:=false;
         inOptions:=false;
         inGlobal:=true;
+        end
+    else if (sLine.Contains(PARAM_LIST_OUTPUT))
+      then
+        begin
+        inParams:=false;
+        inOptions:=false;
+        inGlobal:=false;
         end;
     end;
   //Now go through each entry in the synopsis list
@@ -225,19 +232,30 @@ begin
     begin
     sLine:=optionList[LineNo];
     if (sLine.Contains(paramName)) then inOption:=true;
+    if (inOption and (lineNo > 0)
+      and (optionList[LineNo-1].Trim = '')
+      and sLine.Contains('--'))
+      and not sLine.contains(paramName) then exit;
     if inOption then result:=result + sLine+' ';
-    if (inOption and (lineNo > 0) and (optionList[LineNo-1].Trim = '')and sLine.Contains('--')) then exit;
     end;
+  //TOOD trim
 end;
 //TODO write these
 function TServiceLoader.getParamType(option_: string): string;
+var
+  parts:TStringArray;
 begin
-  result:='';
+  //TODO better to check that previous is ( and next is ) to be certain
+  parts:=option_.split(['(',')']);
+  if (parts.size > 1) then result:=parts[1] else result:='';
 end;
 
 function TServiceLoader.getParamDescription(option_: string): string;
+var
+  parts:TStringArray;
 begin
-  result:=''
+  parts:=option_.split(['(',')']);
+  if (parts.size > 2) then result:=parts[2] else result:='';
 end;
 
 //Temp method to return params in a displayable form
@@ -248,7 +266,7 @@ begin
   result:=TStringlist.Create;
   for lineNo:=0 to pred(params.size) do
     begin
-    result.Add(params[lineNo].paramName + ' '+params[lineNo].required.toString);
+    result.Add(params[lineNo].toString);
     end;
 end;
 
